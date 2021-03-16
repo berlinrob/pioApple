@@ -450,6 +450,8 @@ void loop()
 
   display.display();
 
+  // test for github
+
   printf("%d -- %d : %s\n", newX, newY, WiFi.localIP());
 
   // for event sourced

@@ -18,14 +18,21 @@
  included in any redistribution.
  **************************************************************************/
 
+// #include <FreeRTOS.h>
 #include <WiFi.h>
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+// #include <AsyncTCP.h>
+// #include <ESPAsyncWebServer.h>  //clib
 
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+// #include <FreeRTOS.h>
+
+// custom libraries
+#include "cf_lib_JoyStick.h"
+#include "cf_lib_oled128x64.h"
+#include "cf_lib_websocket.h"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -65,14 +72,20 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define joyY 35  //analog y from 0~4095
 #define joySW 19 //digital switch on joystick
 
+cf_joystick myJoyStick(joyX, joyY, joySW);
+
+// myJoyStick.begin();
+// printf("xxxxxxxx\n");
+// myJoyStick.loop();
+
 int analogreadX = 0;
 int analogreadY = 0;
 int newX = 0;
 int newY = 0;
 char cstr[16];
 //char localWiFi[16];
-IPAddress myWiFi;
-std::string sWiFi;
+// IPAddress myWiFi;
+// std::string sWiFi;
 
 int previousX = 0;
 int previousY = 0;
@@ -85,264 +98,265 @@ unsigned long previousMillis = 0;
 static const unsigned long MENU_DELAY_INTERVAL = 2000; // ms
 
 // Replace with your network credentials
-const char *ssid = "Berlin";
-const char *password = "carrotMolly";
+// const char *ssid = "Berlin";
+// const char *password = "carrotMolly";
 
 bool ledState = 0;
 const int ledPin = 2;
 
 // Create AsyncWebServer object on port 80
-AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
+// AsyncWebServer server(80);
+// AsyncWebSocket ws("/ws");
 
-AsyncEventSource events("/events");
+// AsyncEventSource events("/events");
 
-const char index_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML><html>
-<head>
-  <title>ESP Web Server</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <style>
-  html {
-    font-family: Arial, Helvetica, sans-serif;
-    text-align: center;
-  }
-  h1 {
-    font-size: 1.8rem;
-    color: white;
-  }
-  h2{
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #143642;
-  }
-  .topnav {
-    overflow: hidden;
-    background-color: #143642;
-  }
-  body {
-    margin: 0;
-  }
-  .content {
-    padding: 30px;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  .card {
-    background-color: #F8F7F9;;
-    box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
-    padding-top:10px;
-    padding-bottom:20px;
-  }
-  .button {
-    padding: 15px 50px;
-    font-size: 24px;
-    text-align: center;
-    outline: none;
-    color: #fff;
-    background-color: #0f8b8d;
-    border: none;
-    border-radius: 5px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-   }
-   /*.button:hover {background-color: #0f8b8d}*/
-   .button:active {
-     background-color: #0f8b8d;
-     box-shadow: 2 2px #CDCDCD;
-     transform: translateY(2px);
-   }
-   .state {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-   }
-  </style>
-<title>ESP Web Server</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="data:,">
-</head>
-<body>
-  <div class="topnav">
-    <h1>ESP WebSocket Server</h1>
-  </div>
-  <div class="content">
-    <div class="card">
-      <h2>Output - GPIO 2</h2>
-      <p class="state">state: <span id="state">%STATE%</span></p>
-      <p><button id="button" class="button">Toggle</button></p>
-      <p class="x">X: <span id="x">%X%</span></p>
-      <p class="y">Y: <span id="y">%Y%</span></p>
-    </div>
-  </div>
-<script>
-  var gateway = `ws://${window.location.hostname}/ws`;
-  var websocket;
-  window.addEventListener('load', onLoad);
+// const char index_html[] PROGMEM = R"rawliteral(
+// <!DOCTYPE HTML><html>
+// <head>
+//   <title>ESP Web Server</title>
+//   <meta name="viewport" content="width=device-width, initial-scale=1">
+//   <link rel="icon" href="data:,">
+//   <style>
+//   html {
+//     font-family: Arial, Helvetica, sans-serif;
+//     text-align: center;
+//   }
+//   h1 {
+//     font-size: 1.8rem;
+//     color: white;
+//   }
+//   h2{
+//     font-size: 1.5rem;
+//     font-weight: bold;
+//     color: #143642;
+//   }
+//   .topnav {
+//     overflow: hidden;
+//     background-color: #143642;
+//   }
+//   body {
+//     margin: 0;
+//   }
+//   .content {
+//     padding: 30px;
+//     max-width: 600px;
+//     margin: 0 auto;
+//   }
+//   .card {
+//     background-color: #F8F7F9;;
+//     box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+//     padding-top:10px;
+//     padding-bottom:20px;
+//   }
+//   .button {
+//     padding: 15px 50px;
+//     font-size: 24px;
+//     text-align: center;
+//     outline: none;
+//     color: #fff;
+//     background-color: #0f8b8d;
+//     border: none;
+//     border-radius: 5px;
+//     -webkit-touch-callout: none;
+//     -webkit-user-select: none;
+//     -khtml-user-select: none;
+//     -moz-user-select: none;
+//     -ms-user-select: none;
+//     user-select: none;
+//     -webkit-tap-highlight-color: rgba(0,0,0,0);
+//    }
+//    /*.button:hover {background-color: #0f8b8d}*/
+//    .button:active {
+//      background-color: #0f8b8d;
+//      box-shadow: 2 2px #CDCDCD;
+//      transform: translateY(2px);
+//    }
+//    .state {
+//      font-size: 1.5rem;
+//      color:#8c8c8c;
+//      font-weight: bold;
+//    }
+//   </style>
+// <title>ESP Web Server</title>
+// <meta name="viewport" content="width=device-width, initial-scale=1">
+// <link rel="icon" href="data:,">
+// </head>
+// <body>
+//   <div class="topnav">
+//     <h1>ESP WebSocket Server</h1>
+//   </div>
+//   <div class="content">
+//     <div class="card">
+//       <h2>Output - GPIO 2</h2>
+//       <p class="state">state: <span id="state">%STATE%</span></p>
+//       <p><button id="button" class="button">Toggle</button></p>
+//       <p class="x">X: <span id="x">%X%</span></p>
+//       <p class="y">Y: <span id="y">%Y%</span></p>
+//     </div>
+//   </div>
+// <script>
+//   var gateway = `ws://${window.location.hostname}/ws`;
+//   var websocket;
+//   window.addEventListener('load', onLoad);
 
-if (!!window.EventSource) {
-  var source = new EventSource('/events');
+// if (!!window.EventSource) {
+//   var source = new EventSource('/events');
 
-  source.addEventListener('open', function(e) {
-    console.log("Events Connected");
-  }, false);
+//   source.addEventListener('open', function(e) {
+//     console.log("Events Connected");
+//   }, false);
 
-  source.addEventListener('error', function(e) {
-    if (e.target.readyState != EventSource.OPEN) {
-      console.log("Events Disconnected");
-    }
-  }, false);
+//   source.addEventListener('error', function(e) {
+//     if (e.target.readyState != EventSource.OPEN) {
+//       console.log("Events Disconnected");
+//     }
+//   }, false);
 
-  source.addEventListener('message', function(e) {
-    console.log("message", e.data);
-  }, false);
+//   source.addEventListener('message', function(e) {
+//     console.log("message", e.data);
+//   }, false);
 
-  source.addEventListener('jsX', function(e) {
-    document.getElementById('x').innerHTML = e.data;
-  }, false);
+//   source.addEventListener('jsX', function(e) {
+//     document.getElementById('x').innerHTML = e.data;
+//   }, false);
 
   
-  source.addEventListener('jsY', function(e) {
-    document.getElementById('y').innerHTML = e.data;
-  }, false);}  
+//   source.addEventListener('jsY', function(e) {
+//     document.getElementById('y').innerHTML = e.data;
+//   }, false);}  
   
-  function initWebSocket() {
-    console.log('Trying to open a WebSocket connection...');
-    websocket = new WebSocket(gateway);
-    websocket.onopen    = onOpen;
-    websocket.onclose   = onClose;
-    websocket.onmessage = onMessage; // <-- add this line
-  }
-  function onOpen(event) {
-    console.log('Connection opened');
-  }
-  function onClose(event) {
-    console.log('Connection closed');
-    setTimeout(initWebSocket, 2000);
-  }
-  function onMessage(event) {
-    var state;
-    if (event.data == "1"){
-      state = "ON";
-    }
-    else{
-      state = "OFF";
-    }
-    document.getElementById('state').innerHTML = state;
-  }
-  function onLoad(event) {
-    initWebSocket();
-    initButton();
-  }
-  function initButton() {
-    document.getElementById('button').addEventListener('click', toggle);
-  }
-  function toggle(){
-    websocket.send('toggle');
-  }
-</script>
-</body>
-</html>
-)rawliteral";
+//   function initWebSocket() {
+//     console.log('Trying to open a WebSocket connection...');
+//     websocket = new WebSocket(gateway);
+//     websocket.onopen    = onOpen;
+//     websocket.onclose   = onClose;
+//     websocket.onmessage = onMessage; // <-- add this line
+//   }
+//   function onOpen(event) {
+//     console.log('Connection opened');
+//   }
+//   function onClose(event) {
+//     console.log('Connection closed');
+//     setTimeout(initWebSocket, 2000);
+//   }
+//   function onMessage(event) {
+//     var state;
+//     if (event.data == "1"){
+//       state = "ON";
+//     }
+//     else{
+//       state = "OFF";
+//     }
+//     document.getElementById('state').innerHTML = state;
+//   }
+//   function onLoad(event) {
+//     initWebSocket();
+//     initButton();
+//   }
+//   function initButton() {
+//     document.getElementById('button').addEventListener('click', toggle);
+//   }
+//   function toggle(){
+//     websocket.send('toggle');
+//   }
+// </script>
+// </body>
+// </html>
+// )rawliteral";
 
-void notifyClients()
-{
-  ws.textAll(String(ledState));
-}
+// void notifyClients()
+// {
+//   ws.textAll(String(ledState));
+// }
 
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
-{
-  AwsFrameInfo *info = (AwsFrameInfo *)arg;
-  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
-  {
-    data[len] = 0;
-    if (strcmp((char *)data, "toggle") == 0)
-    {
-      ledState = !ledState;
-      notifyClients();
-    }
-  }
-}
+// void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
+// {
+//   AwsFrameInfo *info = (AwsFrameInfo *)arg;
+//   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
+//   {
+//     data[len] = 0;
+//     if (strcmp((char *)data, "toggle") == 0)
+//     {
+//       ledState = !ledState;
+//       notifyClients();
+//     }
+//   }
+// }
 
-void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
-             void *arg, uint8_t *data, size_t len)
-{
-  switch (type)
-  {
-  case WS_EVT_CONNECT:
-    Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-    break;
-  case WS_EVT_DISCONNECT:
-    Serial.printf("WebSocket client #%u disconnected\n", client->id());
-    break;
-  case WS_EVT_DATA:
-    handleWebSocketMessage(arg, data, len);
-    break;
-  case WS_EVT_PONG:
-  case WS_EVT_ERROR:
-    break;
-  }
-}
+// void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+//              void *arg, uint8_t *data, size_t len)
+// {
+//   switch (type)
+//   {
+//   case WS_EVT_CONNECT:
+//     Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+//     break;
+//   case WS_EVT_DISCONNECT:
+//     Serial.printf("WebSocket client #%u disconnected\n", client->id());
+//     break;
+//   case WS_EVT_DATA:
+//     handleWebSocketMessage(arg, data, len);
+//     break;
+//   case WS_EVT_PONG:
+//   case WS_EVT_ERROR:
+//     break;
+//   }
+// }
 
-void initWebSocket()
-{
-  ws.onEvent(onEvent);
-  server.addHandler(&ws);
-}
+// void initWebSocket()
+// {
+//   ws.onEvent(onEvent);
+//   server.addHandler(&ws);
+// }
 
-String processor(const String &var)
-{
-  Serial.println(var);
-  if (var == "STATE")
-  {
-    if (ledState)
-    {
-      return "ON";
-    }
-    else
-    {
-      return "OFF";
-    }
-  }
-}
+// String processor(const String &var)
+// {
+//   Serial.println(var);
+//   if (var == "STATE")
+//   {
+//     if (ledState)
+//     {
+//       return "ON";
+//     }
+//     else
+//     {
+//       return "OFF";
+//     }
+//   }
+// }
 
 void setup()
 {
   Serial.begin(115200);
-  Serial.flush();
 
-  Serial.println("about to try to connect to wifi....");
+  
 
-  // Connect to Wi-Fi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(1000);
-    printf("Connecting to WiFi..");
-    // Serial.println("Connecting to WiFi..");
-  }
+  // Serial.println("about to try to connect to wifi....");
 
-  // Print ESP Local IP Address
-  Serial.println(WiFi.localIP());
-  //localWiFi = WiFi.localIP().toString();
-  sWiFi = WiFi.localIP();
-  printf("Local WiFi: %s", sWiFi);
+  // // Connect to Wi-Fi
+  // WiFi.begin(ssid, password);
+  // while (WiFi.status() != WL_CONNECTED)
+  // {
+  //   delay(1000);
+  //   printf("Connecting to WiFi..");
+  //   // Serial.println("Connecting to WiFi..");
+  // }
 
-  initWebSocket();
+  // // Print ESP Local IP Address
+  // Serial.println(WiFi.localIP());
+  // //localWiFi = WiFi.localIP().toString();
+  // sWiFi = WiFi.localIP();
+  // // printf("Local WiFi: %s", sWiFi);
 
-  // Route for root / web page
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html", index_html, processor);
-  });
+  // initWebSocket();
 
-  // Start server
-  server.begin();
+  // // Route for root / web page
+  // server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+  //   request->send_P(200, "text/html", index_html, processor);
+  // });
+
+  // // Start server
+  // server.begin();
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
@@ -352,19 +366,19 @@ void setup()
       ; // Don't proceed, loop forever
   }
 
-  //   event source setup
-  events.onConnect([](AsyncEventSourceClient *client) {
-    if (client->lastId())
-    {
-      Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
-    }
-    //send event with message "hello!", id current millis
-    // and set reconnect delay to 1 second
-    client->send("hello!", NULL, millis(), 1000);
-  });
-  //HTTP Basic authentication
-  events.setAuthentication("user", "pass");
-  server.addHandler(&events);
+    // event source setup
+  // events.onConnect([](AsyncEventSourceClient *client) {
+  //   if (client->lastId())
+  //   {
+  //     Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
+  //   }
+  //   //send event with message "hello!", id current millis
+  //   // and set reconnect delay to 1 second
+  //   client->send("hello!", NULL, millis(), 1000);
+  // });
+  // //HTTP Basic authentication
+  // events.setAuthentication("user", "pass");
+  // server.addHandler(&events);
 
   // Show initial display buffer contents on the screen --
   // the library initializes this with an Adafruit splash screen.
@@ -423,14 +437,14 @@ void setup()
 
 void loop()
 {
-  ws.cleanupClients();
+  // ws.cleanupClients();
   display.clearDisplay();
 
   previousX = newX;
   previousY = newY;
 
-  analogreadX = analogRead(joyX);
-  analogreadY = analogRead(joyY);
+  analogreadX = myJoyStick.getAnalogX();
+  analogreadY = myJoyStick.getAnalogY();
   newX = map(analogreadX, 0, 4095, 0, 127);
   newY = map(analogreadY, 0, 4095, 0, 63);
 
@@ -452,7 +466,11 @@ void loop()
 
   // test for github
 
-  printf("%d -- %d : %s\n", newX, newY, WiFi.localIP());
+  myJoyStick.begin();
+  myJoyStick.loop();
+
+  // printf("%d -- %d : %s\n", newX, newY, WiFi.localIP());
+  printf("%d -- %d\n", newX, newY);
 
   // for event sourced
   //if(eventTriggered){ // your logic here
@@ -461,8 +479,8 @@ void loop()
   // events.send("2","jsY",millis());
 
   //if(previousX - newX > 1 || previousX - newX < -1){
-  events.send(itoa(newX, cstr, 10), "jsX", millis());
-  events.send(itoa(newY, cstr, 10), "jsY", millis());
+  // events.send(itoa(newX, cstr, 10), "jsX", millis());
+  // events.send(itoa(newY, cstr, 10), "jsY", millis());
   //}
   //}
 

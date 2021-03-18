@@ -8,15 +8,26 @@
     //AsyncEventSource events("/events");
 
 cf_websocket::cf_websocket(){
-    AsyncWebServer server_temp(80);
+    //AsyncWebServer server_temp(80);
     //cf_websocket::server = server_temp;
     // // Create AsyncWebServer object on port 80
-    // (cf_websocket::server).port = 80; // = AsyncWebServer(80);
+    // cf_websocket::server = AsyncWebServer(80);
     // cf_websocket::ws = AsyncWebSocket("/ws");
 
     // cf_websocket::events = AsyncEventSource("/events");
+
+    // cf_websocket::createObj();
+    this->server() = AsyncWebServer(80);
+    // cf_websocket::server() = AsyncWebServer(80);
+    this->ws() = AsyncWebSocket("/ws");
+    // cf_websocket::ws() = AsyncWebSocket("/ws");
+    this->events() = AsyncEventSource("/events");
+    // cf_websocket::events() = AsyncEventSource("/events");
 }
 
+// void cf_websocket::createObj(){
+//     cf_websocket::server() = AsyncWebServer(80);
+// }
 
 
 void cf_websocket::notifyClients()
@@ -60,8 +71,8 @@ void cf_websocket::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
 void cf_websocket::initWebSocket()
 {   
-    ws.onEvent(cf_websocket::onEvent);
-    server.addHandler(&ws);
+    this->ws().onEvent(this->onEvent());
+    this->server().addHandler(&this->ws());
 }
 
 String cf_websocket::processor(const String &var)
@@ -100,19 +111,25 @@ void begin()
     // cf_websocket::myWiFi = WiFi.localIP();
     // printf("Local WiFi: %s", sWiFi);
 
-    cf_websocket::initWebSocket();
+    // cf_websocket::initWebSocket();
+    this->initWebSocket();
+    // this->initWebSocket();
 
     // Route for root / web page
-    cf_websocket::initWebSocket();
-    cf_websocket::server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send_P(200, "text/html", cf_websocket::index_html, cf_websocket::processor);
+    //cf_websocket::initWebSocket();
+    this->server().on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send_P(200, "text/html", this->index_html, this->processor());
     });
+    // cf_websocket::server().on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    //     request->send_P(200, "text/html", cf_websocket::index_html, cf_websocket::processor());
+    // });
 
     // Start server
-    cf_websocket::server.begin();
+    this->server.begin();
+    // cf_websocket::server.begin();
 
     //   event source setup
-    cf_websocket::events.onConnect([](AsyncEventSourceClient *client) {
+    this->events().onConnect([](AsyncEventSourceClient *client) {
         if (client->lastId())
         {
             Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
@@ -122,8 +139,8 @@ void begin()
         client->send("hello!", NULL, millis(), 1000);
     });
     //HTTP Basic authentication
-    cf_websocket::events.setAuthentication("user", "pass");
-    cf_websocket::server.addHandler(&cf_websocket::events);
+    this->::events().setAuthentication("user", "pass");
+    this->server().addHandler(&this->events());
 }
 
 void loop(){

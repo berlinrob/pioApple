@@ -12,7 +12,7 @@ public:
     cf_websocket();
 
     // attributes
-    AsyncWebServer server;
+    AsyncWebServer server();
     AsyncWebSocket ws();
     AsyncEventSource events();
     // static const char* ssid = 'Berlin';
@@ -22,6 +22,7 @@ public:
 
     // methods
     void begin();
+    // void createObj();
     void loop();
     void notifyClients();
     void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);

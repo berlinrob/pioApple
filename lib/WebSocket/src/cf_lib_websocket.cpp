@@ -71,8 +71,8 @@ void cf_websocket::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
 void cf_websocket::initWebSocket()
 {   
-    this->ws().onEvent(this->onEvent());
-    this->server().addHandler(&this->ws());
+    this->ws().onEvent(this->onEvent);
+    this->server().addHandler(&this->ws);
 }
 
 String cf_websocket::processor(const String &var)
@@ -112,12 +112,12 @@ void begin()
     // printf("Local WiFi: %s", sWiFi);
 
     // cf_websocket::initWebSocket();
-    this->initWebSocket();
+    (*this).cf_websocket::initWebSocket();
     // this->initWebSocket();
 
     // Route for root / web page
     //cf_websocket::initWebSocket();
-    this->server().on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    (*this).server().on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send_P(200, "text/html", this->index_html, this->processor());
     });
     // cf_websocket::server().on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -139,7 +139,7 @@ void begin()
         client->send("hello!", NULL, millis(), 1000);
     });
     //HTTP Basic authentication
-    this->::events().setAuthentication("user", "pass");
+    this->events().setAuthentication("user", "pass");
     this->server().addHandler(&this->events());
 }
 

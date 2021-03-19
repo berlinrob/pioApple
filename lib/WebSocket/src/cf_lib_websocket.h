@@ -25,8 +25,8 @@ public:
     // void createObj();
     void loop();
     void notifyClients();
-    void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
-    void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+    static void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
+    static void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
                  void *arg, uint8_t *data, size_t len);
     void initWebSocket();
     String processor(const String &var);

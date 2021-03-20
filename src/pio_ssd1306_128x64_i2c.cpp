@@ -3,7 +3,7 @@
 
 //#include <SPI.h>
 //#include <Wire.h>
-#include <Adafruit_GFX.h>
+//#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
 // custom libraries
@@ -42,29 +42,23 @@ const int ledPin = 2;
 
 void setup()
 {
-  Serial.begin(115200);
-
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
   {
+    Serial.begin(115200);
+    delay(1000);
     Serial.println(F("SSD1306 allocation failed"));
     for (;;)
       ; // Don't proceed, loop forever
   }
 
+  display.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_WHITE);
   display.display();
-  delay(2000); // Pause for 2 seconds
-
+  delay(250);
   // Clear the buffer
   display.clearDisplay();
-
-  // Draw a single pixel in white
-  display.drawPixel(10, 10, SSD1306_WHITE);
-
-  // Show the display buffer on the screen. You MUST call display() after
-  // drawing commands to make them visible on screen!
   display.display();
-  delay(2000);
+  delay(500);
 }
 
 void loop()
@@ -80,10 +74,17 @@ void loop()
 
   display.fillRect(newX, newY, 5, 5, SSD1306_WHITE);
 
+  display.setTextSize(1);      // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE); // Draw white text
+  display.setCursor(0, 0);     // Start at top-left corner
+
+  display.printf("X: %d\n", newX);
+  display.printf("Y: %d\n", newY);
+
   display.display();
 
-  myJoyStick.begin();
-  myJoyStick.loop();
+  // myJoyStick.begin();
+  // myJoyStick.loop();
 
   // demo display transition moving down
   if (newY == 0)

@@ -9,7 +9,7 @@ cf_joystick::cf_joystick(int X, int Y, int SW){
     pinSW = SW;
 }
 
-void cf_joystick::begin()
+void cf_joystick::setup()
 {
     //printf("inside JoyStick class ::begin");
 }
@@ -21,10 +21,25 @@ void cf_joystick::loop()
 
 int cf_joystick::getAnalogX() //0-1023 for 10 bits or 0-4095 for 12 bits). Data type: int.
 {
-    return analogRead(cf_joystick::pinX);
+    prev_mapX = mapX;
+    analogX = analogRead(cf_joystick::pinX);
+
+    return analogX;
 }
 
 int cf_joystick::getAnalogY()
 {
-    return analogRead(cf_joystick::pinY);
+    prev_mapY = mapY;
+    analogY = analogRead(cf_joystick::pinY);
+    return analogY;
+}
+
+void cf_joystick::setMapX(int p_mapX)
+{
+    cf_joystick::mapX = p_mapX;
+}
+
+void cf_joystick::setMapY(int p_mapY)
+{
+    cf_joystick::mapY = p_mapY;
 }

@@ -35,7 +35,7 @@ bool moveMenu = false;
 
 unsigned long currentMillis = 0;
 unsigned long previousMillis = 0;
-static const unsigned long MENU_DELAY_INTERVAL = 2000; // ms
+static const unsigned long MENU_DELAY_INTERVAL = 1500; // ms
 
 bool ledState = 0;
 const int ledPin = 2;
@@ -69,17 +69,17 @@ void loop()
   previousX = newX;
   previousY = newY;
 
-  newX = map(myJoyStick.getAnalogX(), 0, 4095, 0, 127);
-  newY = map(myJoyStick.getAnalogY(), 0, 4095, 0, 63);
+  myJoyStick.setMapX(map(myJoyStick.getAnalogX(), 0, 4095, 0, 127));
+  myJoyStick.setMapY(map(myJoyStick.getAnalogY(), 0, 4095, 0, 63));
 
-  display.fillRect(newX, newY, 5, 5, SSD1306_WHITE);
+  display.fillRect(myJoyStick.mapX, myJoyStick.mapY, 5, 5, SSD1306_WHITE);
 
   display.setTextSize(1);      // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE); // Draw white text
   display.setCursor(0, 0);     // Start at top-left corner
 
-  display.printf("X: %d\n", newX);
-  display.printf("Y: %d\n", newY);
+  display.printf("X: %d\n", myJoyStick.mapX);
+  display.printf("Y: %d\n", myJoyStick.mapY);
 
   display.display();
 
@@ -87,7 +87,7 @@ void loop()
   // myJoyStick.loop();
 
   // demo display transition moving down
-  if (newY == 0)
+  if (myJoyStick.mapY == 0)
   {
     if (previousMillis == 0)
     {
@@ -110,9 +110,9 @@ void loop()
   }
 
   // demo display transition moving up
-  if (newY == 58)
+  if (myJoyStick.mapY >= 58)
   {
-    if (previousMillis == 0)
+    if (previousMillis < 250)
     {
       previousMillis = millis();
     }

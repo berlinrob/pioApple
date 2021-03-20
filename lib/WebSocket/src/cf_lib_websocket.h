@@ -12,27 +12,31 @@ public:
     cf_websocket();
 
     // attributes
-    AsyncWebServer server();
-    AsyncWebSocket ws();
-    AsyncEventSource events();
+    static AsyncWebServer server;
+    AsyncWebSocket ws;
+    static AsyncEventSource events;
     // static const char* ssid = 'Berlin';
     // static const char* password = "carrotMolly";
     // IPAddress* myWiFi = &WiFi.localIP();
-    std::string sWiFi;
+    //static std::string sWiFi;
+    static const char *sWiFi;
+    static char localWiFi[16];
+    static String ssWiFi;
 
     // methods
-    void begin();
+    static void begin();
     // void createObj();
-    void loop();
-    void notifyClients();
+    static void _loop();
+    static void notifyClients();
     static void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
     static void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
-                 void *arg, uint8_t *data, size_t len);
-    void initWebSocket();
-    String processor(const String &var);
+                        void *arg, uint8_t *data, size_t len);
+    static void initWebSocket();
+    static String processor(const String &var);
+    //char localWiFi[16];
 
     // html
-    const char index_html[6500] PROGMEM = R"rawliteral(
+    static constexpr char index_html[6500] PROGMEM = R"rawliteral(
                     <!DOCTYPE HTML><html>
                     <head>
                     <title>ESP Web Server</title>

@@ -17,7 +17,7 @@
  All text above, and the splash screen below must be
  included in any redistribution.
  **************************************************************************/
-
+#include <iostream>
 // #include <FreeRTOS.h>
 #include <WiFi.h>
 // #include <AsyncTCP.h>
@@ -85,7 +85,9 @@ int newY = 0;
 char cstr[16];
 //char localWiFi[16];
 // IPAddress myWiFi;
-// std::string sWiFi;
+std::string sWiFi;
+
+cf_websocket* mysock;// = new cf_websocket();
 
 int previousX = 0;
 int previousY = 0;
@@ -329,24 +331,29 @@ void setup()
 {
   Serial.begin(115200);
 
+  mysock = new cf_websocket();
   
+  mysock->begin();
+
+
+
 
   // Serial.println("about to try to connect to wifi....");
 
   // // Connect to Wi-Fi
-  // WiFi.begin(ssid, password);
+  // WiFi.begin("Berlin", "carrotMolly");
   // while (WiFi.status() != WL_CONNECTED)
   // {
   //   delay(1000);
   //   printf("Connecting to WiFi..");
-  //   // Serial.println("Connecting to WiFi..");
+  //   Serial.println("Connecting to WiFi..");
   // }
 
-  // // Print ESP Local IP Address
+  // Print ESP Local IP Address
   // Serial.println(WiFi.localIP());
   // //localWiFi = WiFi.localIP().toString();
   // sWiFi = WiFi.localIP();
-  // // printf("Local WiFi: %s", sWiFi);
+  // printf("Local WiFi: %s", sWiFi);
 
   // initWebSocket();
 
@@ -440,6 +447,8 @@ void loop()
   // ws.cleanupClients();
   display.clearDisplay();
 
+  mysock->_loop();
+
   previousX = newX;
   previousY = newY;
 
@@ -469,8 +478,18 @@ void loop()
   myJoyStick.begin();
   myJoyStick.loop();
 
-  // printf("%d -- %d : %s\n", newX, newY, WiFi.localIP());
-  printf("%d -- %d\n", newX, newY);
+    const int NBYTES = 4;
+    uint8_t octet[NBYTES];
+    char ipAddressFinal[16];
+    for(int i = 0 ; i < NBYTES ; i++)
+    {
+        octet[i] = WiFi.localIP() >> (i * 8);
+    }
+
+  sprintf(ipAddressFinal, "%d.%d.%d.%d", octet[3], octet[2], octet[1], octet[0]);
+  //printf("%d -- %d : %s\n", newX, newY, ipAddressFinal);
+  //printf("%d -- %d : %s\n", newX, newY, WiFi.localIP().toString());
+  //printf("%d -- %d\n", newX, newY);
 
   // for event sourced
   //if(eventTriggered){ // your logic here

@@ -17,11 +17,11 @@ cf_websocket::cf_websocket(){
     // cf_websocket::events = AsyncEventSource("/events");
 
     // cf_websocket::createObj();
-    this->server() = AsyncWebServer(80);
+    server = AsyncWebServer(80);
     // cf_websocket::server() = AsyncWebServer(80);
-    this->ws() = AsyncWebSocket("/ws");
+    ws = AsyncWebSocket("/ws");
     // cf_websocket::ws() = AsyncWebSocket("/ws");
-    this->events() = AsyncEventSource("/events");
+    events = AsyncEventSource("/events");
     // cf_websocket::events() = AsyncEventSource("/events");
 }
 
@@ -71,8 +71,8 @@ void cf_websocket::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 
 void cf_websocket::initWebSocket()
 {   
-    this->ws().onEvent(this->onEvent);
-    this->server().addHandler(&this->ws);
+    ws.onEvent(onEvent);
+    server.addHandler(&cf_websocket::ws);
 }
 
 String cf_websocket::processor(const String &var)
@@ -89,9 +89,10 @@ String cf_websocket::processor(const String &var)
         //   return "OFF";
         // }
     }
+    return "OFF";
 }
 
-void begin()
+void cf_websocket::begin()
 {
     Serial.println("about to try to connect to wifi....");
 
@@ -101,35 +102,40 @@ void begin()
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(1000);
-        printf("Connecting to WiFi..");
+        printf("Connecting to WiFi from lib..");
         // Serial.println("Connecting to WiFi..");
     }
 
+
     // Print ESP Local IP Address
     Serial.println(WiFi.localIP());
-    //localWiFi = WiFi.localIP().toString();
-    // cf_websocket::myWiFi = WiFi.localIP();
-    // printf("Local WiFi: %s", sWiFi);
+    //cf_websocket::localWiFi = *WiFi.localIP().toString();
+    cf_websocket::sWiFi = WiFi.localIP().toString().c_str();
+    printf("from library ==== Local WiFi: %s", cf_websocket::sWiFi);
+    // printf("from library ==== Local WiFi: %s", cf_websocket::localWiFi);
 
     // cf_websocket::initWebSocket();
-    (*this).cf_websocket::initWebSocket();
+    cf_websocket::initWebSocket();
     // this->initWebSocket();
+
+    //const char* myChar = "off";
+
 
     // Route for root / web page
     //cf_websocket::initWebSocket();
-    (*this).server().on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send_P(200, "text/html", this->index_html, this->processor());
+    cf_websocket::server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send_P(200, "text/html", "<html></html>", cf_websocket::processor);
     });
     // cf_websocket::server().on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     //     request->send_P(200, "text/html", cf_websocket::index_html, cf_websocket::processor());
     // });
 
     // Start server
-    this->server.begin();
+    cf_websocket::server.begin();
     // cf_websocket::server.begin();
 
     //   event source setup
-    this->events().onConnect([](AsyncEventSourceClient *client) {
+    cf_websocket::events.onConnect([](AsyncEventSourceClient *client) {
         if (client->lastId())
         {
             Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
@@ -139,12 +145,13 @@ void begin()
         client->send("hello!", NULL, millis(), 1000);
     });
     //HTTP Basic authentication
-    this->events().setAuthentication("user", "pass");
-    this->server().addHandler(&this->events());
+    cf_websocket::events.setAuthentication("user", "pass");
+    cf_websocket::server.addHandler(&cf_websocket::events);
 }
 
-void loop(){
+void cf_websocket::_loop(){
     // cf_websocket::ws.cleanupClients();
 //   cf_websocket::events.send(itoa(newX, cstr, 10), "jsX", millis());
 //   cf_websocket::events.send(itoa(newY, cstr, 10), "jsY", millis());
+    //printf("%s/n", WiFi.localIP());
 }

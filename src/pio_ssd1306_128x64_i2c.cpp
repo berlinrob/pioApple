@@ -12,8 +12,8 @@
 // #include "cf_lib_websocket.h"
 
 // display
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define SCREEN_WIDTH 128    // OLED display width, in pixels
+#define SCREEN_HEIGHT 64    // OLED display height, in pixels
 #define OLED_RESET 4        // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 
@@ -74,17 +74,27 @@ void loop()
 
   display.fillRect(myJoyStick.mapX, myJoyStick.mapY, 5, 5, SSD1306_WHITE);
 
-  display.setTextSize(1);      // Normal 1:1 pixel scale
+  display.setTextSize(1);              // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE); // Draw white text
-  display.setCursor(0, 0);     // Start at top-left corner
+  display.setCursor(0, 0);             // Start at top-left corner
 
   display.printf("X: %d\n", myJoyStick.mapX);
   display.printf("Y: %d\n", myJoyStick.mapY);
+  display.printf("previousMillis: %lx", previousMillis);
 
   display.display();
 
-  // myJoyStick.begin();
-  // myJoyStick.loop();
+  // demo - menu transition
+  if(myJoyStick.mapY < 5 || myJoyStick.mapY > 58){
+    if(previousMillis == 0){
+      previousMillis = millis();
+    }
+    else if(millis() - previousMillis > MENU_DELAY_INTERVAL){
+      screenTransitionIncrement = myJoyStick.mapY;
+
+      while
+    }
+  }
 
   // demo display transition moving down
   if (myJoyStick.mapY == 0)
@@ -92,6 +102,13 @@ void loop()
     if (previousMillis == 0)
     {
       previousMillis = millis();
+      display.setTextSize(1);              // Normal 1:1 pixel scale
+      display.setTextColor(SSD1306_WHITE); // Draw white text
+      display.setCursor(0, 0);             // Start at top-left corner
+      display.printf("X: %d\n", myJoyStick.mapX);
+      display.printf("Y: %d\n", myJoyStick.mapY);
+      display.printf("previousMillis: %lx", previousMillis);
+      display.display();
     }
     else if (millis() - previousMillis > MENU_DELAY_INTERVAL)
     {
@@ -101,12 +118,22 @@ void loop()
       {
         display.clearDisplay();
         display.drawLine(0, screenTransitionIncrement * 6, SCREEN_WIDTH, screenTransitionIncrement * 6, SSD1306_WHITE);
+        // display.setTextSize(1);              // Normal 1:1 pixel scale
+        // display.setTextColor(SSD1306_WHITE); // Draw white text
+        // display.setCursor(0, 0);             // Start at top-left corner
+        // display.printf("X: %d\n", myJoyStick.mapX);
+        // display.printf("Y: %d\n", myJoyStick.mapY);
+        // display.printf("previousMillis: %d", previousMillis);
+        // display.printf("screenTransitionIncrement: %d", screenTransitionIncrement);
         screenTransitionIncrement++;
         display.display();
       }
 
       previousMillis = 0;
     }
+  }
+  else{
+    previousMillis = 0;
   }
 
   // demo display transition moving up

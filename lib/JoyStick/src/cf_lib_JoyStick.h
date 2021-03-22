@@ -12,18 +12,23 @@ public:
     int pinY;
     int pinSW;
 
-    int prevX;
-    int prevY;
-    int prevSW;
+    int mapX;
+    int mapY;
+
+    int prev_mapX;
+    int prev_mapY;
 
     int analogX;
     int analogY;
 
     // methods
-    void begin();
+    void setup();
     void loop();
     int getAnalogX();
     int getAnalogY();
+    
+    void setMapX(int);
+    void setMapY(int);
 
 private:
 };

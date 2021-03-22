@@ -32,8 +32,8 @@ int previousY = 0;
 
 int myOffset = 0;
 
-int screenTransitionIncrement = 0;
 bool moveMenu = false;
+const char* myMenu[] = {"ONE","TWO","THREE","FOUR"};
 
 unsigned long currentMillis = 0;
 unsigned long previousMillis = 0;
@@ -82,7 +82,8 @@ void loop()
 
   display.printf("X: %d\n", myJoyStick.mapX);
   display.printf("Y: %d\n", myJoyStick.mapY);
-  display.printf("previousMillis: %lx", previousMillis);
+  display.printf("previousMillis: %lx\n", previousMillis);
+  display.printf("%s\n", myMenu[0]);
 
   display.display();
 
@@ -95,15 +96,12 @@ void loop()
     }
     else if (millis() - previousMillis > MENU_DELAY_INTERVAL)
     {
-      screenTransitionIncrement = myJoyStick.mapY;
-
       myJoyStick.mapY < 5 ? myOffset = 0 : myOffset = 60;
 
       for (int i = 0; i <= 12; i++)
       {
         display.clearDisplay();
-        display.drawLine(0, abs(myOffset - 5*i), SCREEN_WIDTH, abs(myOffset - 5*i), SSD1306_WHITE);;
-        screenTransitionIncrement++;
+        display.drawLine(0, abs(myOffset - 5*i), SCREEN_WIDTH, abs(myOffset - 5*i), SSD1306_WHITE);
         display.display();
       }
       previousMillis = 0;
@@ -112,3 +110,4 @@ void loop()
   else{
     previousMillis = 0;
   }
+}

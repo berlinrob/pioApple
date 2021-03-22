@@ -30,12 +30,14 @@ int newY = 0;
 int previousX = 0;
 int previousY = 0;
 
+int myOffset = 0;
+
 int screenTransitionIncrement = 0;
 bool moveMenu = false;
 
 unsigned long currentMillis = 0;
 unsigned long previousMillis = 0;
-static const unsigned long MENU_DELAY_INTERVAL = 1500; // ms
+static const unsigned long MENU_DELAY_INTERVAL = 500; // ms
 
 bool ledState = 0;
 const int ledPin = 2;
@@ -85,50 +87,25 @@ void loop()
   display.display();
 
   // demo - menu transition
-  if(myJoyStick.mapY < 5 || myJoyStick.mapY > 58){
-    if(previousMillis == 0){
-      previousMillis = millis();
-    }
-    else if(millis() - previousMillis > MENU_DELAY_INTERVAL){
-      screenTransitionIncrement = myJoyStick.mapY;
-
-      while
-    }
-  }
-
-  // demo display transition moving down
-  if (myJoyStick.mapY == 0)
+  if (myJoyStick.mapY < 5 || myJoyStick.mapY > 58)
   {
     if (previousMillis == 0)
     {
       previousMillis = millis();
-      display.setTextSize(1);              // Normal 1:1 pixel scale
-      display.setTextColor(SSD1306_WHITE); // Draw white text
-      display.setCursor(0, 0);             // Start at top-left corner
-      display.printf("X: %d\n", myJoyStick.mapX);
-      display.printf("Y: %d\n", myJoyStick.mapY);
-      display.printf("previousMillis: %lx", previousMillis);
-      display.display();
     }
     else if (millis() - previousMillis > MENU_DELAY_INTERVAL)
     {
-      screenTransitionIncrement = 0;
+      screenTransitionIncrement = myJoyStick.mapY;
 
-      while (screenTransitionIncrement < 10)
+      myJoyStick.mapY < 5 ? myOffset = 0 : myOffset = 60;
+
+      for (int i = 0; i <= 12; i++)
       {
         display.clearDisplay();
-        display.drawLine(0, screenTransitionIncrement * 6, SCREEN_WIDTH, screenTransitionIncrement * 6, SSD1306_WHITE);
-        // display.setTextSize(1);              // Normal 1:1 pixel scale
-        // display.setTextColor(SSD1306_WHITE); // Draw white text
-        // display.setCursor(0, 0);             // Start at top-left corner
-        // display.printf("X: %d\n", myJoyStick.mapX);
-        // display.printf("Y: %d\n", myJoyStick.mapY);
-        // display.printf("previousMillis: %d", previousMillis);
-        // display.printf("screenTransitionIncrement: %d", screenTransitionIncrement);
+        display.drawLine(0, abs(myOffset - 5*i), SCREEN_WIDTH, abs(myOffset - 5*i), SSD1306_WHITE);;
         screenTransitionIncrement++;
         display.display();
       }
-
       previousMillis = 0;
     }
   }
@@ -136,26 +113,67 @@ void loop()
     previousMillis = 0;
   }
 
-  // demo display transition moving up
-  if (myJoyStick.mapY >= 58)
-  {
-    if (previousMillis < 250)
-    {
-      previousMillis = millis();
-    }
-    else if (millis() - previousMillis > MENU_DELAY_INTERVAL)
-    {
-      screenTransitionIncrement = 58;
+  // demo display transition moving down
+  // if (myJoyStick.mapY == 0)
+  // {
+  //   if (previousMillis == 0)
+  //   {
+  //     previousMillis = millis();
+  //     display.setTextSize(1);              // Normal 1:1 pixel scale
+  //     display.setTextColor(SSD1306_WHITE); // Draw white text
+  //     display.setCursor(0, 0);             // Start at top-left corner
+  //     display.printf("X: %d\n", myJoyStick.mapX);
+  //     display.printf("Y: %d\n", myJoyStick.mapY);
+  //     display.printf("previousMillis: %lx", previousMillis);
+  //     display.display();
+  //   }
+  //   else if (millis() - previousMillis > MENU_DELAY_INTERVAL)
+  //   {
+  //     screenTransitionIncrement = 0;
 
-      while (screenTransitionIncrement > 0)
-      {
-        display.clearDisplay();
-        display.drawLine(0, screenTransitionIncrement, SCREEN_WIDTH, screenTransitionIncrement, SSD1306_WHITE);
-        screenTransitionIncrement -= 5;
-        display.display();
-      }
+  //     while (screenTransitionIncrement < 10)
+  //     {
+  //       display.clearDisplay();
+  //       display.drawLine(0, screenTransitionIncrement * 6, SCREEN_WIDTH, screenTransitionIncrement * 6, SSD1306_WHITE);
+  //       // display.setTextSize(1);              // Normal 1:1 pixel scale
+  //       // display.setTextColor(SSD1306_WHITE); // Draw white text
+  //       // display.setCursor(0, 0);             // Start at top-left corner
+  //       // display.printf("X: %d\n", myJoyStick.mapX);
+  //       // display.printf("Y: %d\n", myJoyStick.mapY);
+  //       // display.printf("previousMillis: %d", previousMillis);
+  //       // display.printf("screenTransitionIncrement: %d", screenTransitionIncrement);
+  //       screenTransitionIncrement++;
+  //       display.display();
+  //     }
 
-      previousMillis = 0;
-    }
-  }
+  //     previousMillis = 0;
+  //   }
+  // }
+  // else
+  // {
+  //   previousMillis = 0;
+  // }
+
+  // // demo display transition moving up
+  // if (myJoyStick.mapY >= 58)
+  // {
+  //   if (previousMillis < 250)
+  //   {
+  //     previousMillis = millis();
+  //   }
+  //   else if (millis() - previousMillis > MENU_DELAY_INTERVAL)
+  //   {
+  //     screenTransitionIncrement = 58;
+
+  //     while (screenTransitionIncrement > 0)
+  //     {
+  //       display.clearDisplay();
+  //       display.drawLine(0, screenTransitionIncrement, SCREEN_WIDTH, screenTransitionIncrement, SSD1306_WHITE);
+  //       screenTransitionIncrement -= 5;
+  //       display.display();
+  //     }
+
+  //     previousMillis = 0;
+  //   }
+  // }
 }

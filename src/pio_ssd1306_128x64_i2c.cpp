@@ -32,7 +32,8 @@ int previousY = 0;
 
 int myOffset = 0;
 
-bool moveMenu = false;
+// bool moveMenu = false;
+int menuIndex = 0;
 const char *myMenu[] = {"ONE", "TWO", "THREE", "FOUR"};
 
 unsigned long currentMillis = 0;
@@ -76,14 +77,14 @@ void loop()
 
   display.fillRect(myJoyStick.mapX, myJoyStick.mapY, 5, 5, SSD1306_WHITE);
 
-  display.setTextSize(1);              // Normal 1:1 pixel scale
+  display.setTextSize(3);              // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE); // Draw white text
   display.setCursor(0, 0);             // Start at top-left corner
 
-  display.printf("X: %d\n", myJoyStick.mapX);
-  display.printf("Y: %d\n", myJoyStick.mapY);
-  display.printf("previousMillis: %lx\n", previousMillis);
-  display.printf("%s\n", myMenu[0]);
+  // display.printf("X: %d\n", myJoyStick.mapX);
+  // display.printf("Y: %d\n", myJoyStick.mapY);
+  // display.printf("previousMillis: %lx\n", previousMillis);
+  display.printf("%s\n", myMenu[menuIndex]);
 
   display.display();
 
@@ -96,36 +97,47 @@ void loop()
     }
     else if (millis() - previousMillis > MENU_DELAY_INTERVAL)
     {
-      myJoyStick.mapY < 5 ? myOffset = 0 : myOffset = 60;
+      if (myJoyStick.mapY < 5)
+      {
+        myOffset = 0;
+        menuIndex == 0 ? menuIndex = 3 : menuIndex--;
+      }
+      else
+      {
+        myOffset = 60;
+        menuIndex == 3 ? menuIndex = 0 : menuIndex++;
+      }
 
       for (int i = 0; i <= 12; i++)
       {
         display.clearDisplay();
 
-        display.drawLine(0, abs(myOffset - 5 * i), SCREEN_WIDTH, abs(myOffset - 5 * i), SSD1306_WHITE);
+        // display.drawLine(0, abs(myOffset - 5 * i), SCREEN_WIDTH, abs(myOffset - 5 * i), SSD1306_WHITE);
 
         if (myOffset == 0)
         {
+
           display.setCursor(0, abs(-5 * i) - SCREEN_HEIGHT); // Start at top-left corner
-          display.printf("X: %d\n", myJoyStick.mapX);
-          display.printf("Y: %d\n", myJoyStick.mapY);
-          display.printf("previousMillis: %lx\n", previousMillis);
-          display.printf("%s\n", myMenu[0]);
+          // display.printf("X: %d\n", myJoyStick.mapX);
+          // display.printf("Y: %d\n", myJoyStick.mapY);
+          // display.printf("previousMillis: %lx\n", previousMillis);
+          display.printf("%s\n", myMenu[menuIndex]);
         }
         else
         {
+
           display.setCursor(0, -5 * i); // Start at top-left corner
-          display.printf("X: %d\n", myJoyStick.mapX);
-          display.printf("Y: %d\n", myJoyStick.mapY);
-          display.printf("previousMillis: %lx\n", previousMillis);
-          display.printf("%s\n", myMenu[0]);
+          // display.printf("X: %d\n", myJoyStick.mapX);
+          // display.printf("Y: %d\n", myJoyStick.mapY);
+          // display.printf("previousMillis: %lx\n", previousMillis);
+          display.printf("%s\n", myMenu[menuIndex]);
         }
 
         display.setCursor(0, abs(myOffset - 5 * i)); // Start at top-left corner
-        display.printf("X: %d\n", myJoyStick.mapX);
-        display.printf("Y: %d\n", myJoyStick.mapY);
-        display.printf("previousMillis: %lx\n", previousMillis);
-        display.printf("%s\n", myMenu[0]);
+        // display.printf("X: %d\n", myJoyStick.mapX);
+        // display.printf("Y: %d\n", myJoyStick.mapY);
+        // display.printf("previousMillis: %lx\n", previousMillis);
+        display.printf("%s\n", myMenu[menuIndex]);
         display.display();
       }
       previousMillis = 0;
